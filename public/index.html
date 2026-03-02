@@ -12,9 +12,9 @@
         }
 
         body {
-            background: linear-gradient(45deg, #1f0033 0%, #4b0082 25%, #3a0066 50%, #6600cc 75%, #1f0033 100%);
+            background: linear-gradient(45deg, #1a002a, #3b0066, #110022, #4d0088, #1a002a);
             background-size: 400% 400%;
-            animation: liquid-stream 12s ease-in-out infinite;
+            animation: liquid-stream 30s ease-in-out infinite, trippy-hue 20s linear infinite;
             color: #fff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -36,6 +36,12 @@
             background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.5) 100%);
             z-index: -1;
             pointer-events: none;
+        }
+
+        @keyframes trippy-hue {
+            0% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(30deg); }
+            100% { filter: hue-rotate(0deg); }
         }
 
         @keyframes liquid-stream {
@@ -198,6 +204,15 @@
             opacity: 1;
             box-shadow: 0 0 5px #fff;
         }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            #announcement { font-size: 1.5rem; height: 2rem; margin-bottom: 1rem; }
+            .cell { width: 80px; height: 80px; font-size: 3rem; }
+            .board { grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(3, 80px); padding: 5px; gap: 5px; }
+            button.reset { margin-top: 20px; font-size: 1rem; padding: 8px 20px; }
+        }
     </style>
 </head>
 <body>
@@ -214,8 +229,9 @@
 
     <button class="reset" onclick="resetGame()">Restart Game</button>
     
-    <div style="margin-top: 15px; display: flex; gap: 10px; align-items: center;">
+    <div style="margin-top: 15px; display: flex; gap: 15px; align-items: center; z-index: 100;">
         <button id="soundToggle" class="sound-toggle" style="margin-top: 0;">Play Ethereal Pulsar</button>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5" style="width: 100px; cursor: pointer;">
     </div>
 
     <script>
@@ -223,8 +239,27 @@
         let audioCtx;
         let activeNodes = [];
         let isPlaying = false;
+        let masterGain;
+        let hasInteracted = false;
 
         const soundToggle = document.getElementById('soundToggle');
+        const volumeSlider = document.getElementById('volumeSlider');
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioCtx.createGain();
+                // Max volume mapped to 0.1 to keep it pleasant
+                masterGain.gain.value = volumeSlider.value * 0.1; 
+                masterGain.connect(audioCtx.destination);
+
+                volumeSlider.addEventListener('input', (e) => {
+                    if (masterGain) {
+                        masterGain.gain.value = e.target.value * 0.1;
+                    }
+                });
+            }
+        }
 
         function stopAudio() {
             activeNodes.forEach(node => {
@@ -241,7 +276,7 @@
             osc.frequency.value = freq;
             gain.gain.value = gainValue;
             osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            gain.connect(masterGain);
             osc.start();
             activeNodes.push(osc, gain);
             return { osc, gain };
@@ -263,13 +298,10 @@
         }
 
         function toggleSound() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
+            initAudio();
 
             if (!isPlaying) {
                 playPulsar();
-
                 isPlaying = true;
                 soundToggle.textContent = 'Stop Pulsar';
                 soundToggle.style.boxShadow = '0 0 10px #0ff';
@@ -285,7 +317,18 @@
             }
         }
 
-        soundToggle.addEventListener('click', toggleSound);
+        soundToggle.addEventListener('click', () => {
+            hasInteracted = true;
+            toggleSound();
+        });
+
+        // Autoplay on first interaction
+        window.addEventListener('pointerdown', () => {
+            if (!hasInteracted && !isPlaying) {
+                hasInteracted = true;
+                toggleSound();
+            }
+        }, { once: true });
 
         const boardEl = document.getElementById('board');
         const announcementEl = document.getElementById('announcement');
@@ -488,20 +531,23 @@
         let isWinning = false;
         let winAnimTime = 0;
 
-        window.addEventListener('mousemove', (e) => {
-            // Get the bounding box of the emoji container
+        function handleEmojiInput(clientX, clientY) {
             const rect = emojiContainer.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-            
-            // Calculate vector from emoji to mouse
-            const dx = e.clientX - centerX;
-            const dy = e.clientY - centerY;
-            
-            // Limit the rotation angle (max ~45 degrees / 0.8 rad)
+            const dx = clientX - centerX;
+            const dy = clientY - centerY;
             targetRotationY = Math.atan2(dx, 300); 
             targetRotationX = Math.atan2(dy, 300);
-        });
+        }
+
+        window.addEventListener('mousemove', (e) => handleEmojiInput(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => {
+            if(e.touches.length > 0) handleEmojiInput(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+        window.addEventListener('touchstart', (e) => {
+            if(e.touches.length > 0) handleEmojiInput(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
 
         window.triggerThumbsUp = function() {
             isWinning = true;
@@ -561,25 +607,33 @@
         }
         let mousePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
-        window.addEventListener('mousemove', (e) => {
-            mousePos.x = e.clientX;
-            mousePos.y = e.clientY;
+        function handleRibbonInput(clientX, clientY) {
+            mousePos.x = clientX;
+            mousePos.y = clientY;
 
             // Parallax calculations
-            const xAxis = (window.innerWidth / 2 - e.clientX) / 25;
-            const yAxis = (window.innerHeight / 2 - e.clientY) / 25;
+            const xAxis = (window.innerWidth / 2 - clientX) / 25;
+            const yAxis = (window.innerHeight / 2 - clientY) / 25;
             targetTiltY = -xAxis; // rotateY
             targetTiltX = yAxis;  // rotateX
 
             // Spotlight calculations
             if (boardEl) {
                 const rect = boardEl.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
                 boardEl.style.setProperty('--mouse-x', `${x}px`);
                 boardEl.style.setProperty('--mouse-y', `${y}px`);
             }
-        });
+        }
+
+        window.addEventListener('mousemove', (e) => handleRibbonInput(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => {
+            if(e.touches.length > 0) handleRibbonInput(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+        window.addEventListener('touchstart', (e) => {
+            if(e.touches.length > 0) handleRibbonInput(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
 
         function animateEnterprise() {
             requestAnimationFrame(animateEnterprise);
