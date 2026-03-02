@@ -1,10 +1,10 @@
-# steezeTIC-TAC-TOE 🌌🕹️
+# steezeTIC-TAC-TOE 
 
 An immersive, enterprise-grade, neon-infused Tic-Tac-Toe experience. Built with Node.js and Three.js, this isn't just a game—it's a journey through a liquid-glass dimension.
 
 ![Project Preview](https://via.placeholder.com/800x450.png?text=steezeTIC-TAC-TOE+Preview)
 
-## ✨ Features
+##  Features
 
 - **Liquid Glass Aesthetics:** An animated purple liquid background that flows like a river stream.
 - **Enterprise-Grade Motion Design:**
@@ -18,7 +18,7 @@ An immersive, enterprise-grade, neon-infused Tic-Tac-Toe experience. Built with 
 - **Generative Audio:** Featuring the **Ethereal Pulsar**—a generative space drone created with the Web Audio API to deepen the immersion.
 - **Robust Logic:** A Node.js/Express backend handles all game state, turn switching, and win detection.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v14 or higher)
@@ -51,5 +51,5 @@ This project is configured for easy deployment to **Google Cloud Run**.
 gcloud run deploy neon-tic-tac-toe --source .
 ```
 
-## 📜 License
+##  License
 MIT
