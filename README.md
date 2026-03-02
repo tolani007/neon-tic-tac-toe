@@ -2,7 +2,7 @@
 
 An immersive, enterprise-grade, neon-infused Tic-Tac-Toe experience. Built with Node.js and Three.js, this isn't just a game—it's a journey through a liquid-glass dimension.
 
-![Project Preview](https://via.placeholder.com/800x450.png?text=steezeTIC-TAC-TOE+Preview)
+![Play steezeTIC-TAC-TOE ]([https://via.placeholder.com/800x450.png?text=steezeTIC-TAC-TOE+Preview](https://neon-tic-tac-toe-370657913521.us-west1.run.app/))
 
 ##  Features
 
