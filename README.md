@@ -1,8 +1,8 @@
 # steezeTIC-TAC-TOE 
 
-An immersive, enterprise-grade, neon-infused Tic-Tac-Toe experience. Built with Node.js and Three.js, this isn't just a game—it's a journey through a liquid-glass dimension.
+An immersive, enterprise-grade, neon-infused Tic-Tac-Toe experience. Built with Node.js and Three.js, I was just testing out building with this stack on my birthday.
 
-![Play steezeTIC-TAC-TOE ](https://neon-tic-tac-toe-370657913521.us-west1.run.app/)
+[Play steezeTIC-TAC-TOE](https://neon-tic-tac-toe-370657913521.us-west1.run.app/)
 
 ##  Features
 
